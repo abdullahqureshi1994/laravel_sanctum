@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Auth;
 use App\Models\User;
+use Illuminate\Support\Facades\Validator;
 use Hash;
 
 class AuthController extends Controller
@@ -13,6 +14,20 @@ class AuthController extends Controller
 	public function index(){
 
 		return User::all();
+
+	}
+	public function register(Request $request){
+		$request->validate([
+			'name'=> 'required',
+			'email' => 'email|required',
+			'password' => 'required'
+		  ]);
+		$user=new User();
+		$user->name=$request->name;
+		$user->email=$request->email;
+		$user->password=bcrypt($request->password);
+		$user->save();
+		return response()->json(['status_code'=> 200, 'message'=>'User created successfully!']);
 
 	}
 
@@ -50,4 +65,13 @@ class AuthController extends Controller
 	    ]);
 	  }
 	}
+	 public function logout(Request $request){
+
+		$request->user()->currentAccessToken()->delete();
+		return response()->json([
+			'status_code' => 200,
+			'message' => 'Token deleted successfully.',
+			
+		  ]);
+	 }
 }
